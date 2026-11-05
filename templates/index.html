@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>暖伴 · HealthyChat</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="app" data-scene="tea">
+        <aside class="scene-sidebar">
+            <a class="brand" href="/">✳ <span>暖伴<small>一个可以慢下来的地方</small></span></a>
+            <div class="sidebar-label">给此刻的你，选一个角落</div>
+            <nav class="scene-list" aria-label="陪伴情景">
+            {% for id, scene in scenes.items() %}
+                <button class="scene-card" data-scene="{{ id }}" aria-pressed="{{ 'true' if id == 'tea' else 'false' }}">
+                    <img src="/static/art/{{ id }}.svg" alt="" />
+                    <span><strong>{{ scene.name }}</strong><small>{{ scene.tag }}</small></span><span class="scene-dot">●</span>
+                </button>
+            {% endfor %}
+            </nav>
+            <div class="sidebar-note"><img src="/static/art/hug.svg" alt="抱着爱心的小熊" /><p>不必每一天都很棒，<br>做你自己就很好。</p><small>一点温柔，留给自己</small></div>
+            <div class="sidebar-footer">AI 陪伴 · 用心听你说</div>
+        </aside>
+        <main class="chat-main">
+        <header>
+            <div class="header-left">
+                <svg class="header-logo" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+                <div><h1 id="sceneName">午后茶屋</h1><p class="header-subtitle">暖伴 · AI 陪伴助手</p></div>
+            </div>
+            <div class="header-actions">
+                <button id="clearBtn" title="清空对话">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                </button>
+                <button id="settingsBtn" title="设置">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <div id="chatArea" class="chat-area" role="log" aria-label="聊天记录" aria-live="polite"></div>
+        <div class="composer-wrap">
+            <div class="composer-tools"><button id="stickerToggle" aria-expanded="false" aria-controls="stickerTray">☺ 送一张心情贴图</button><span>不急，想好再说</span></div>
+            <div id="stickerTray" class="sticker-tray" hidden>
+            {% for id, label in stickers.items() %}
+                <button data-sticker="{{ id }}" aria-label="发送贴图：{{ label }}"><img src="/static/art/{{ 'sticker-tea' if id == 'tea' else id }}.svg" alt="" /><span>{{ label }}</span></button>
+            {% endfor %}
+            </div>
+        <div class="input-area">
+            <textarea id="msgInput" placeholder="这一刻，你想聊些什么？" aria-label="聊天消息" rows="1"></textarea>
+            <button id="sendBtn" title="发送">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+            </button>
+        </div>
+        <p class="composer-note">这里是 AI 陪伴空间，不能替代专业帮助。 <span>Enter 发送 · Shift + Enter 换行</span></p>
+        </div>
+        </main>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>模型设置</h2>
+                <button id="closeSettings" title="关闭">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="config-section">
+                    <h3>模型 A — 聊天</h3>
+                    <label>供应商
+                        <select id="a_api_base">
+                            <option value="https://edge.gpt.rmqg.org/v1">Edge · OpenAI 兼容</option>
+                            <option value="https://openrouter.ai/api/v1">OpenRouter</option>
+                            <option value="https://dashscope.aliyuncs.com/compatible-mode/v1">Qwen (通义千问)</option>
+                            <option value="https://api.deepseek.com/v1">DeepSeek</option>
+                        </select>
+                    </label>
+                    <label>API Key
+                        <input type="password" id="a_api_key" placeholder="sk-...">
+                    </label>
+                    <label>模型名称
+                        <input type="text" id="a_model" placeholder="gpt-5.6-sol">
+                    </label>
+                </div>
+                <div class="config-section">
+                    <h3>模型 B — 心理评估</h3>
+                    <label>供应商
+                        <select id="b_api_base">
+                            <option value="https://edge.gpt.rmqg.org/v1">Edge · OpenAI 兼容</option>
+                            <option value="https://openrouter.ai/api/v1">OpenRouter</option>
+                            <option value="https://dashscope.aliyuncs.com/compatible-mode/v1">Qwen (通义千问)</option>
+                            <option value="https://api.deepseek.com/v1">DeepSeek</option>
+                        </select>
+                    </label>
+                    <label>API Key
+                        <input type="password" id="b_api_key" placeholder="sk-...">
+                    </label>
+                    <label>模型名称
+                        <input type="text" id="b_model" placeholder="gpt-5.6-sol">
+                    </label>
+                </div>
+                <div class="config-section">
+                    <h3>模型 C — 健康顾问</h3>
+                    <label>供应商
+                        <select id="c_api_base">
+                            <option value="https://edge.gpt.rmqg.org/v1">Edge · OpenAI 兼容</option>
+                            <option value="https://openrouter.ai/api/v1">OpenRouter</option>
+                            <option value="https://dashscope.aliyuncs.com/compatible-mode/v1">Qwen (通义千问)</option>
+                            <option value="https://api.deepseek.com/v1">DeepSeek</option>
+                        </select>
+                    </label>
+                    <label>API Key
+                        <input type="password" id="c_api_key" placeholder="sk-...">
+                    </label>
+                    <label>模型名称
+                        <input type="text" id="c_model" placeholder="gpt-5.6-sol">
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="resetDefaults" class="btn-secondary">恢复默认</button>
+                <button id="saveSettings" class="btn-primary">保存设置</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked@15.0.4/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.4/dist/purify.min.js"></script>
+    <script id="sceneData" type="application/json">{{ scenes | tojson }}</script>
+    <script id="stickerData" type="application/json">{{ stickers | tojson }}</script>
+    <script src="/static/app.js"></script>
+</body>
+</html>
